@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler {
 	
@@ -59,35 +60,83 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 	}
 	
 	public void OnEndDrag(PointerEventData eventData) {
-		//Debug.Log ("OnEndDrag");
-		this.transform.SetParent( parentToReturnTo );
-		this.transform.SetSiblingIndex( placeholder.transform.GetSiblingIndex() );
+		Debug.Log ("OnEndDrag on round " + NextRound.roundNo);
+        if ((abilitiesUI.text.Contains("+") || abilitiesUI.text.Contains("x")) && NextRound.roundNo > 3)
+        {
+            Debug.Log("Not a player");
+            this.transform.SetParent(null);
+            placeholder.transform.SetParent(null);
+
+            foreach (Transform child in parentToReturnTo.transform)
+            {
+                int[] abilityExec = { 2, 2, 4, 4,
+                    (child.gameObject).GetComponent<Draggable>().power,
+                    (child.gameObject).GetComponent<Draggable>().defense };
+                if (abilityIdx % 2 == 0)
+                    (child.gameObject).GetComponent<Draggable>().power += abilityExec[abilityIdx];
+                else
+                    (child.gameObject).GetComponent<Draggable>().defense += abilityExec[abilityIdx];
+                //Debug.Log("Power = " + (child.gameObject).GetComponent<Draggable>().power);
+                (child.gameObject).GetComponent<Draggable>().updateCardUI(1, true);
+                //child.GetComponent<Draggable>().power += 2;
+                //child.GetComponent<Draggable>().updateCardUI(1, true);
+            }
+        }
+        else if (leaderAbilitiesText.Any(abilitiesUI.text.Contains) && NextRound.roundNo > 3)
+        {
+            this.transform.SetParent(null);
+            placeholder.transform.SetParent(null);
+
+            foreach (Transform child in parentToReturnTo.transform)
+            {
+                int[] abilityExec = { 2 * (child.gameObject).GetComponent<Draggable>().power,
+                    2 * (child.gameObject).GetComponent<Draggable>().defense,
+                    (child.gameObject).GetComponent<Draggable>().power + (child.gameObject).GetComponent<Draggable>().defense,
+                    (child.gameObject).GetComponent<Draggable>().defense + (child.gameObject).GetComponent<Draggable>().power,
+                    (child.gameObject).GetComponent<Draggable>().power,
+                    (child.gameObject).GetComponent<Draggable>().defense };
+                if (abilityIdx % 2 == 0)
+                    (child.gameObject).GetComponent<Draggable>().power += abilityExec[abilityIdx];
+                else
+                    (child.gameObject).GetComponent<Draggable>().defense += abilityExec[abilityIdx];
+                //Debug.Log("Power = " + (child.gameObject).GetComponent<Draggable>().power);
+                (child.gameObject).GetComponent<Draggable>().updateCardUI(1, true);
+                //child.GetComponent<Draggable>().power += 2;
+                //child.GetComponent<Draggable>().updateCardUI(1, true);
+            }
+        }
+        else
+        {
+            this.transform.SetParent(parentToReturnTo);
+            this.transform.SetSiblingIndex(placeholder.transform.GetSiblingIndex());
+        }	
 		GetComponent<CanvasGroup>().blocksRaycasts = true;
 
 		Destroy(placeholder);
 	}
 
-    [Header("Text Boxes")]
+    //[Header("Text Boxes")]
     public Text abilitiesUI;
     public Text powerUI;
     public Text defenseUI;
 
-    [Header("Images on card")]
+    //[Header("Images on card")]
     public Image player;
     public Image frame;
 
-    [Header("Stats")]
+    //[Header("Stats")]
     public int power;
     public int defense;
-    /* aici depinde de voi cum retineti abilitatile. */
-    public List<int> abilities = new List<int>();
-    public string[] abilitiesText = { "Flying", "Trample", "Deathtouch", "Defender", "Reach", "First Strike" };
 
-    public void updateCardUI(int round)
+    public int abilityIdx;
+    public string[] abilitiesText = { "+2 ATK", "+2 DEF", "+4 ATK", "+4 DEF", "x2 ATK", "x2 DEF" };
+    public string[] leaderAbilitiesText = { "Blessing", "Spartan", "O.G.", "Speaker", "Godfather", "Skilled"};
+
+    public void updateCardUI(int round, bool isPlayer)
     {
         powerUI.text = power.ToString();
         defenseUI.text = defense.ToString();
-        abilitiesUI.text = abilitiesText[abilities[0]];
+        abilitiesUI.text = isPlayer ? "Player" : abilitiesText[abilityIdx];
         if (round == 1)
             player.sprite = Resources.Load<Sprite>("Footballers/" + Random.Range(40, 80).ToString());
         if (round == 2)
@@ -103,6 +152,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
             frame.sprite = Resources.Load<Sprite>("Leader");
             powerUI.text = "LEA";
             defenseUI.text = "DER";
+            abilitiesUI.text = leaderAbilitiesText[abilityIdx];
         }
     }
 
