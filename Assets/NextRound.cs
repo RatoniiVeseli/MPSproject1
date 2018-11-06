@@ -68,6 +68,26 @@ public class NextRound : MonoBehaviour {
                 child.SetParent(null);
             }
         }
+
+        if (roundNo == 6)
+        {
+            genDeck.interactable = true;
+
+            foreach (Transform child in GameObject.Find("Quarterback").transform)
+            {
+                child.SetParent(null);
+            }
+
+            foreach (Transform child in GameObject.Find("Middle").transform)
+            {
+                child.SetParent(null);
+            }
+
+            foreach (Transform child in GameObject.Find("Forward").transform)
+            {
+                child.SetParent(null);
+            }
+        }
     }
 
     public static int getScore()
@@ -93,11 +113,24 @@ public class NextRound : MonoBehaviour {
 
     public void nextHand()
     {
-        if (roundNo < 3)
-            genDeck.interactable = false;
-        else
-            genDeck.GetComponentInChildren<Text>().text = "NEXT";
         roundNo++; // next round
+        if (roundNo < 3)
+        {
+            genDeck.interactable = false;
+            if (roundNo == 1)
+                genDeck.GetComponentInChildren<Text>().text = "SPELLS";
+            else if (roundNo == 2)
+                genDeck.GetComponentInChildren<Text>().text = "LEADERS";
+        }
+        else if (roundNo == 3)
+            genDeck.GetComponentInChildren<Text>().text = "PLAY";
+        else if (roundNo == 4)
+            genDeck.GetComponentInChildren<Text>().text = "SPELLS";
+        else if (roundNo == 5)
+            genDeck.GetComponentInChildren<Text>().text = "FINISH";
+        else
+            genDeck.interactable = false;
+
         //Debug.Log("Negat" + cardsChosen);
         bool isPlayer = true;
         for (int i = 0; i < 12 && cardsChosen < 11; i++)

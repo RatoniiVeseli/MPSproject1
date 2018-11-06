@@ -43,6 +43,12 @@ public class DropZone : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoin
 		Draggable d = eventData.pointerDrag.GetComponent<Draggable>();
 		if(d != null)
         {
+            if (gameObject.name.Contains("Hand"))
+            {
+                d.parentToReturnTo = this.transform;
+                return;
+            }
+
             if (gameObject.name.Contains("Quarter") && (cardsDropped_Q < 4 || !d.abilitiesUI.text.Contains("Player")))
             {
                 d.parentToReturnTo = this.transform;
@@ -63,12 +69,6 @@ public class DropZone : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoin
                 if (d.abilitiesUI.text.Contains("Player"))
                     cardsDropped_F ++;
             }
-
-            if (gameObject.name.Contains("Hand"))
-            {
-                d.parentToReturnTo = this.transform;
-            }
-
         }
             
 
